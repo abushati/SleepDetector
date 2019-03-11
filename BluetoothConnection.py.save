@@ -1,0 +1,18 @@
+import shlex, subprocess
+
+class Bluetooth():
+	def __init__(self):
+		self.checkIfBindExist()			
+		'''
+		command = 'sudo rfcomm bind /dev/rfcomm0 98:D3:37:91:0F:BF 1'
+		args = shlex.split(command)
+		subprocess.Popen(args)
+		time.sleep(2)
+		'''
+	def checkIfBindExist(self):
+		command = '[ -c /dev/rfcomm0 ] && \'echo "File exist"\' || \'echo "File does not exist"\' '
+		args = shlex.split(command)
+		print(args)
+		shellOutput = subprocess.Popen(args)
+		#shellOutput = subprocess.check_output(args)
+		#print(shellOutput.stdout.read())
