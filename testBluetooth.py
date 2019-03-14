@@ -1,3 +1,4 @@
+
 import serial,time,shlex,subprocess
 '''
 
@@ -10,7 +11,7 @@ bluetooth = serial.Serial("/dev/rfcomm0",baudrate = 19200)
 print('connected to the arduino')
 
 data = 9
-dat="hello"
+dat="hello<"
 counter = 0
 while True:
 	if counter < 4:
@@ -18,7 +19,7 @@ while True:
 		time.sleep(4)
 		print(dat)
 	else:
-		bluetooth.write(str.encode('bye'))
+		bluetooth.write(str.encode('bye<'))
 		print('bye')
 		time.sleep(4)
 	counter += 1

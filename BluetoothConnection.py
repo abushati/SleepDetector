@@ -24,7 +24,11 @@ class Bluetooth():
 	def isMoving(self):
 		command = "movingState"
 		self.bluetooth.write(str.encode(command))
-		movingState = self.bluetooth.read(3)
+		time.sleep(1)
+		movingState = self.bluetooth.read(8)
+		print(movingState.decode('UTF-8',errors = 'replace'))
+		print('this is the moving stat' +str(movingState))
+
 		return movingState
 
 	#send signal to RCcar to take over the driving

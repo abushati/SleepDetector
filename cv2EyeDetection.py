@@ -10,8 +10,8 @@ from picamera import PiCamera
 #from bluetoothConnection import Bluetooth
 from multiprocessing import Process
 import pygame
-
-
+from BluetoothConnection import Bluetooth
+import time
 
 def ROI (image,points):
 	
@@ -28,6 +28,7 @@ def eye_aspect_ratio(eye):
 	return ear
 
 def playSound(framesSoundOn):
+	return
 	channel.play(sound)
 	# if the number of frames the sound is on for divided by 20 gives a remander of 0, increase the 
 	# volume of the alarm.
@@ -36,8 +37,7 @@ def playSound(framesSoundOn):
 
 def frameChecker(flag,frame_check,framesSoundOn):
     if flag >= frame_check:
-        #send alarm to the car
-        #sender.autoSlowDown("Sleeping")
+
 
         framesSoundOn += 1
         print(channel.get_busy())
@@ -86,10 +86,10 @@ if __name__=="__main__":
     flag=0
 
     while True:
-        #moving = communicate.isCarMoving()
-        moving = True
-        print('the car is moving')
-        if moving:	
+        moving = communicate.isMoving()
+        print(moving)
+        time.sleep(2)
+        if moving:
             #print(pygame.mixer.Channel.get_sound())
             print(flag)
             #print('it is running')
@@ -102,7 +102,9 @@ if __name__=="__main__":
             #For Pi
             frame = camera.capture(rawCapture, format="bgr", use_video_port=True)
             frame = rawCapture.array
-            #orginal size of the image is 720 by 1280
+            
+
+		#orginal size of the image is 720 by 1280
             #resizing to 281 by 500
             frame = imutils.resize(frame, width=500)
 			
@@ -186,9 +188,9 @@ if __name__=="__main__":
 
                 #This will run if the rccar is not trigger to slowdown
                 #we dont need to send the signal multiple times
-				#elif flag > 0 and not communicat.slowDownTrigger:
-					#communicate.autoSlowDown()
-					#	flag = 0
+                elif flag > 0 and not communicat.slowDownTrigger:
+                    communicate.autoSlowDown()
+                    flag = 0
                 
                 
                 else:
