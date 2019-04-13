@@ -22,12 +22,13 @@ class Bluetooth():
 
 	#check to see if the car is moving
 	def isMoving(self):
+
 		command = "movingState"
 		self.bluetooth.write(str.encode(command))
-		time.sleep(1)
-		movingState = self.bluetooth.read(8)
-		print(movingState.decode('UTF-8',errors = 'replace'))
-		print('this is the moving stat' +str(movingState))
+		
+		movingState = self.bluetooth.readline()	
+		print(movingState)
+		print('Car state: '+ str(movingState))
 
 		return movingState
 
@@ -36,3 +37,4 @@ class Bluetooth():
 		command = "sleeping"
 		self.bluetooth.write(str.encode(command))
 		self.slowDownTrigger = True
+		time.sleep(5)

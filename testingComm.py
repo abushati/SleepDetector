@@ -6,14 +6,10 @@ time.sleep(5)
 
 counter = 0
 while True:
-	if counter%5 < 2:
+	
 
-		bt.write(str.encode('hi'))	
-		print('sent hi')
-
-	else:
-		bt.write(str.encode("bye"))
-		print('sent bye')
+	bt.write(str.encode('movingState'))	
+	print('sent movingState')
 		
 	
 	

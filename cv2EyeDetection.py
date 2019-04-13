@@ -13,6 +13,9 @@ import pygame
 from BluetoothConnection import Bluetooth
 import time
 
+
+flag = 0
+
 def ROI (image,points):
 	
 	mask = np.zeros_like(image)
@@ -35,12 +38,17 @@ def playSound(framesSoundOn):
 	if framesSoundOn % 10 == 0:
 		soundVolume += .5
 
-def frameChecker(flag,frame_check,framesSoundOn):
-    if flag >= frame_check:
+def frameChecker(frame_check,framesSoundOn):
+    global flag
 
+    if flag >= frame_check:
+        print('WWWWWWWAARRRRRMMMMING')
 
         framesSoundOn += 1
-        print(channel.get_busy())
+        print('Channel stat' + str(channel.get_busy()))
+        communicate.autoSlowDown()
+        print('sent slow down')
+        flag = 0
         if channel.get_busy() == 0:
             playSound(framesSoundOn)
 
@@ -69,7 +77,7 @@ if __name__=="__main__":
     framesSoundOn = 0 
     testCounter = 0
     thresh = 0.3
-    frame_check = 5
+    frame_check = 2
     detect = dlib.get_frontal_face_detector()
     predict = dlib.shape_predictor("/home/pi/Camera/shape_predictor_68_face_landmarks.dat")# Dat file is the crux of the code
 
@@ -83,15 +91,16 @@ if __name__=="__main__":
     rawCapture = PiRGBArray(camera)
     camera.resolution = (640, 480)
     camera.framerate = 32
-    flag=0
-
+    
     while True:
-        moving = communicate.isMoving()
+        print('start of main loop')
+        moving = communicate.isMoving().decode().strip()
         print(moving)
-        time.sleep(2)
-        if moving:
+
+        
+        if moving == 'moving':
             #print(pygame.mixer.Channel.get_sound())
-            print(flag)
+            print('this is the flag: ' +str(flag))
             #print('it is running')
             #print(f'this is the number of frames sound is on {framesSoundOn} and this is the volume {soundVolume}')
             print ('this is the number of frames sound is on {} and this is the volume {}'.format(str(framesSoundOn),str(soundVolume)))
@@ -102,7 +111,6 @@ if __name__=="__main__":
             #For Pi
             frame = camera.capture(rawCapture, format="bgr", use_video_port=True)
             frame = rawCapture.array
-            
 
 		#orginal size of the image is 720 by 1280
             #resizing to 281 by 500
@@ -116,19 +124,21 @@ if __name__=="__main__":
             #pick the area of interest
             gray = ROI(gray,[points])
 
-            #cv2.imshow("gray frame", gray)
+            cv2.imshow("gray frame", gray)
             subjects = detect(gray , 1)
             #this is returned ----> [rectangle(187,104,294,211)]
 
 			
             # if a face is not detected, increase the flag
-            if len(subjects) == 0:
+
+           
+           #if len(subjects) == 0:
                 #print('there is no face detected ')
-                flag += 1
-                frameChecker(flag,frame_check,framesSoundOn)
-                rawCapture.truncate(0)
-                continue
-			
+                #flag += 1
+               # frameChecker(frame_check,framesSoundOn)
+                #rawCapture.truncate(0)
+                #continue
+
             #for each face that is detected in the frame, perfrom this 
             #for loop
             #print('not cont')
@@ -181,14 +191,15 @@ if __name__=="__main__":
                 cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
 
                 if ear < thresh:
+                    print('ear is gearter the thresh')
                     flag += 1
                     #print (flag)
-                    frameChecker(flag,frame_check,framesSoundOn)
+                    frameChecker(frame_check,framesSoundOn)
 
 
                 #This will run if the rccar is not trigger to slowdown
                 #we dont need to send the signal multiple times
-                elif flag > 0 and not communicat.slowDownTrigger:
+                elif flag > 0 and not communicate.slowDownTrigger:
                     communicate.autoSlowDown()
                     flag = 0
                 
@@ -199,5 +210,5 @@ if __name__=="__main__":
                         channel.stop()
 
                     flag = 0
-
+            print('end of loop flag is '+str(flag))
             rawCapture.truncate(0)
