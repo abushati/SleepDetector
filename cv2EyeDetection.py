@@ -76,8 +76,8 @@ if __name__=="__main__":
     soundVolume = .3
     framesSoundOn = 0 
     testCounter = 0
-    thresh = 0.3
-    frame_check = 2
+    thresh = 0.225
+    frame_check = 3
     detect = dlib.get_frontal_face_detector()
     predict = dlib.shape_predictor("/home/pi/Camera/shape_predictor_68_face_landmarks.dat")# Dat file is the crux of the code
 
@@ -99,6 +99,7 @@ if __name__=="__main__":
 
         
         if moving == 'moving':
+       # if True:    
             #print(pygame.mixer.Channel.get_sound())
             print('this is the flag: ' +str(flag))
             #print('it is running')
@@ -112,7 +113,7 @@ if __name__=="__main__":
             frame = camera.capture(rawCapture, format="bgr", use_video_port=True)
             frame = rawCapture.array
 
-		#orginal size of the image is 720 by 1280
+            #orginal size of the image is 720 by 1280
             #resizing to 281 by 500
             frame = imutils.resize(frame, width=500)
 			
@@ -124,18 +125,17 @@ if __name__=="__main__":
             #pick the area of interest
             gray = ROI(gray,[points])
 
-            cv2.imshow("gray frame", gray)
-            subjects = detect(gray , 1)
-            #this is returned ----> [rectangle(187,104,294,211)]
 
-			
+            subjects = detect(gray , 1)
+            print(' this is the len of subjects '+str(len(subjects)))            #this is returned ----> [rectangle(187,104,294,211)]
+
+
             # if a face is not detected, increase the flag
 
-           
-           #if len(subjects) == 0:
+            #if len(subjects) == 0:
                 #print('there is no face detected ')
                 #flag += 1
-               # frameChecker(frame_check,framesSoundOn)
+                #frameChecker(frame_check,framesSoundOn)
                 #rawCapture.truncate(0)
                 #continue
 
@@ -185,30 +185,35 @@ if __name__=="__main__":
                 rightEAR = eye_aspect_ratio(rightEye)
                 ear = (leftEAR + rightEAR) / 2.0
                 leftEyeHull = cv2.convexHull(leftEye)
-                #print(leftEyeHull)
                 rightEyeHull = cv2.convexHull(rightEye) 
                 cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 255), 1)
                 cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
-
+                
+     
                 if ear < thresh:
                     print('ear is gearter the thresh')
+                    print(ear)
                     flag += 1
                     #print (flag)
                     frameChecker(frame_check,framesSoundOn)
-
+                else:
+                    flag = 0
 
                 #This will run if the rccar is not trigger to slowdown
                 #we dont need to send the signal multiple times
-                elif flag > 0 and not communicate.slowDownTrigger:
-                    communicate.autoSlowDown()
-                    flag = 0
+     #           elif flag > 0 and not communicate.slowDownTrigger:
+      #              communicate.autoSlowDown()
+       #             flag = 0
                 
                 
-                else:
-                    #if the drivers eyes are open and the alarm is on, turn it off
-                    if channel.get_busy() == 1:
-                        channel.stop()
+ #               else:
+  #                  #if the drivers eyes are open and the alarm is on, turn it off
+   #                 if channel.get_busy() == 1:
+    #                    channel.stop()
 
                     flag = 0
-            print('end of loop flag is '+str(flag))
+            cv2.imshow('image', frame)
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord('q'):
+                break
             rawCapture.truncate(0)
